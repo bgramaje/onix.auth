@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import {
   Filter, ObjectId,
+  WithoutId,
 } from 'mongodb';
 
 import { BaseDb, BaseDbInterface } from './BaseDb';
@@ -10,7 +11,7 @@ import { HttpMessage } from '../models/HttpMessage';
 
 export interface UserDbInterface extends BaseDbInterface<UserModel> {
     post(user: UserModel): Promise<HttpMessage>,
-    put(id: Filter<UserModel>, body: Omit<UserModel, '_id'>): Promise<HttpMessage>,
+    put(id: Filter<UserModel>, body:WithoutId<UserModel>): Promise<HttpMessage>,
 }
 
 export class UserDB extends BaseDb<UserModel> implements UserDbInterface {
@@ -42,7 +43,7 @@ export class UserDB extends BaseDb<UserModel> implements UserDbInterface {
     }
   }
 
-  async put(id: Filter<UserModel>, body: Omit<UserModel, '_id'>): Promise<HttpMessage> {
+  async put(id: Filter<UserModel>, body: WithoutId<UserModel>): Promise<HttpMessage> {
     try {
       await this.collection.updateOne({ _id: id }, { $set: { body } });
       return {

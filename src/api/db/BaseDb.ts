@@ -1,5 +1,6 @@
 import {
   Collection, Db, Document, Filter, ObjectId, WithId,
+  WithoutId,
 } from 'mongodb';
 
 import { logger } from '../../config/logger';
@@ -11,7 +12,7 @@ export interface BaseDbInterface<T extends Document> {
   getById(id: Filter<T>): Promise<WithId<T> | null>,
 }
 
-export abstract class BaseDb<T extends Document> implements BaseDbInterface<T> {
+export abstract class BaseDb<T extends Document = Document> implements BaseDbInterface<T> {
   collection: Collection<T>;
 
   constructor(db: Db, collection: string) {
@@ -30,8 +31,8 @@ export abstract class BaseDb<T extends Document> implements BaseDbInterface<T> {
 
   async getById(id: Filter<T>): Promise<WithId<T> | null> {
     try {
-      const entities = await this.collection.findOne({ _id: id });
-      return entities;
+      const entity = await this.collection.findOne({ _id: id });
+      return entity;
     } catch (error) {
       logger.error(error);
       return null;
@@ -40,5 +41,5 @@ export abstract class BaseDb<T extends Document> implements BaseDbInterface<T> {
 
   abstract post(entity: T): Promise<HttpMessage>;
 
-  abstract put(id: Filter<T>, body: Omit<T, '_id'>): Promise<HttpMessage>;
+  abstract put(id: Filter<T>, body: WithoutId<T>): Promise<HttpMessage>;
 }

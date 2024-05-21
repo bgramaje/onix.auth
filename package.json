@@ -16,6 +16,7 @@
     "@types/morgan": "^1.9.9",
     "bcrypt": "^5.1.1",
     "express": "^4.19.2",
+    "express-async-handler": "^1.2.0",
     "mongodb": "^6.6.2",
     "morgan": "^1.10.0",
     "winston": "^3.13.0"
