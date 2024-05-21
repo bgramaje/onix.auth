@@ -1,0 +1,54 @@
+{
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+      "ecmaVersion": 2017
+    },
+    "rules": {
+      "arrow-parens": ["error", "always", { "requireForBlockBody": true }],
+      "import/no-absolute-path": "off",
+      "no-multiple-empty-lines": ["error", { "max": 1, "maxEOF": 1 }],
+      "no-trailing-spaces": "error",
+      "lines-between-class-members": ["error", "always"],
+      "no-console": "off",
+      "function-paren-newline": "off",
+      "import/no-unresolved": "off",
+      "import/extensions": ["off", "never"],
+      "linebreak-style": ["error", "unix"],
+      "no-param-reassign": ["error", { "props": false }],
+      "import/no-extraneous-dependencies": "off",
+      "import/prefer-default-export": "off",
+      "no-underscore-dangle": "off",
+      "max-len": ["error", {
+        "code": 120,
+        "tabWidth": 2,
+        "ignoreComments": true,
+        "ignoreUrls": false,
+        "ignoreStrings": true,
+        "ignoreTemplateLiterals": true,
+        "ignoreRegExpLiterals": false
+      }],
+      "@typescript-eslint/no-unused-vars": "off"
+    },
+    "plugins": [
+      "jsx-a11y",
+      "import",
+      "@typescript-eslint"
+    ],
+    "extends": [
+      "eslint:recommended",
+      "airbnb",
+      "plugin:@typescript-eslint/recommended"
+    ],
+    "env": {
+      "browser": true,
+      "node": true,
+      "commonjs": true,
+      "shared-node-browser": true,
+      "es6": true,
+      "mocha": true,
+      "jquery": true,
+      "mongo": true
+    },
+    "root": true,
+    "ignorePatterns": ["**/node_modules/*", "**/dist/*", "**/.eslintcache/*"]
+  }
