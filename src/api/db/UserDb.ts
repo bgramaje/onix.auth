@@ -1,8 +1,7 @@
 import bcrypt from 'bcrypt';
 import {
-  Filter, ObjectId,
+  Filter,
   WithoutId,
-  Db,
 } from 'mongodb';
 
 import { BaseDb, BaseDbInterface } from './BaseDb';
@@ -18,16 +17,16 @@ export interface UserDbInterface extends BaseDbInterface<UserModel> {
 export class UserDb extends BaseDb<UserModel> implements UserDbInterface {
   async post(user: UserModel): Promise<HttpMessage> {
     try {
-      const { password = null } = user ?? {};
-      if (!password) {
+      const { password = null, username = null } = user ?? {};
+      if (!password || !username) {
         return {
           status: 404,
-          msg: 'Missing required password attribute',
+          msg: 'Missing required attributes',
         };
       }
 
       const hashPwd = await bcrypt.hash(password, 10);
-      const entity: UserModel = { ...user, password: hashPwd };
+      const entity: UserModel = { ...user, password: hashPwd, _id: user?.username };
       await this.collection.insertOne(entity);
 
       return {

@@ -1,13 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
-  Filter, WithId, WithoutId, Document,
+  Document,
   Db,
 } from 'mongodb';
+
 import { NextFunction, Request, Response } from 'express';
 import { BaseDb } from '../db/BaseDb';
-import { logger } from '../../config/logger';
-import { HttpMessage } from '../models/HttpMessage';
-import { UserDb } from '../db/UserDb';
-import { UserModel } from '../models/UserModel';
 
 export interface BaseCtrlInterface<U> {
   repository: U
@@ -22,16 +20,15 @@ export abstract class BaseCtrl<T extends Document, U extends BaseDb<T>> implemen
     this.repository = repository;
   }
 
-  public static getInstance<A extends Document, Z extends BaseDb<A>, C extends BaseCtrl<A, Z>>(
-    Ctor: new (...args: any[]) => C,
-    controllerName: string,
+  public static getInstance<C extends BaseCtrl<any, any>>(
+    Ctor: new (db: Db) => C,
     db: Db,
   ): C {
-    if (!BaseCtrl.instances[controllerName]) {
-      BaseCtrl.instances[controllerName] = new Ctor(db);
+    if (!BaseCtrl.instances[Ctor.name]) {
+      BaseCtrl.instances[Ctor.name] = new Ctor(db);
     }
 
-    return BaseCtrl.instances[controllerName] as C;
+    return BaseCtrl.instances[Ctor.name] as C;
   }
 
   abstract get(req: Request, res: Response, next: NextFunction): Promise<void>;

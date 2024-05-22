@@ -7,7 +7,6 @@ import {
   WithId,
   WithoutId,
 } from 'mongodb';
-import { logger } from '../../config/logger';
 import { HttpMessage } from '../models/HttpMessage';
 
 export interface BaseDbInterface<T extends Document> {
@@ -25,27 +24,27 @@ export abstract class BaseDb<T extends Document> implements BaseDbInterface<T> {
     this.collection = db.collection<T>(collectionName);
   }
 
-  public static getInstance<U extends Document, C extends BaseDb<U>>(
-    Ctor: new (...args: any[]) => C,
+  public static getInstance<C extends BaseDb<any>>(
+    Ctor: new (db: Db, collectionName: string) => C,
     db: Db,
     collectionName: string,
   ): C {
-    if (!BaseDb.instances[collectionName]) {
-      BaseDb.instances[collectionName] = new Ctor(db, collectionName);
+    if (!BaseDb.instances[Ctor.name]) {
+      BaseDb.instances[Ctor.name] = new Ctor(db, collectionName);
     }
 
-    return BaseDb.instances[collectionName] as C;
+    return BaseDb.instances[Ctor.name] as C;
   }
 
-  async get(query?: Filter<T>): Promise<WithId<T>[]> {
+  get = async (query?: Filter<T>): Promise<WithId<T>[]> => {
     const entities = await this.collection.find(query ?? {}).toArray();
     return entities;
-  }
+  };
 
-  async getById(id: Filter<T>): Promise<WithId<T> | null> {
+  getById = async (id: Filter<T>): Promise<WithId<T> | null> => {
     const entity = await this.collection.findOne({ _id: id });
     return entity;
-  }
+  };
 
   abstract post(entity: T): Promise<HttpMessage>;
 

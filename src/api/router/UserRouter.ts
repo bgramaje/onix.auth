@@ -14,8 +14,9 @@ export class UserRouter {
 
   constructor(db: Db) {
     this.router = Router();
+
     const controller: UserController = BaseCtrl
-      .getInstance<UserModel, UserDb, UserController>(UserController, 'users', db);
+      .getInstance<UserController>(UserController, db);
 
     this.router.get('/', expressAsyncHandler(controller.get));
     this.router.get('/:id', expressAsyncHandler(controller.getById));

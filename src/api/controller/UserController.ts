@@ -1,17 +1,17 @@
 import {
-  Filter, WithoutId, Document, Db,
+  Filter, WithoutId, Db,
 } from 'mongodb';
+
 import { NextFunction, Request, Response } from 'express';
 
 import { UserDb } from '../db/UserDb';
-import { HttpMessage } from '../models/HttpMessage';
 import { UserModel } from '../models/UserModel';
 import { BaseCtrl } from './BaseController';
 import { BaseDb } from '../db/BaseDb';
 
 export class UserController extends BaseCtrl<UserModel, UserDb> {
   constructor(db: Db) {
-    const repository: UserDb = BaseDb.getInstance<UserModel, UserDb>(UserDb, db, 'users');
+    const repository: UserDb = BaseDb.getInstance<UserDb>(UserDb, db, 'users');
     super(repository);
   }
 
@@ -48,6 +48,8 @@ export class UserController extends BaseCtrl<UserModel, UserDb> {
   post = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { body = {} } = req;
+      console.log(body);
+
       const data = await this.repository.post(body as UserModel ?? {});
       res.status(200).json(data);
     } catch (error) {
