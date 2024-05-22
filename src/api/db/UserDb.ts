@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import {
   Filter, ObjectId,
   WithoutId,
+  Db,
 } from 'mongodb';
 
 import { BaseDb, BaseDbInterface } from './BaseDb';
@@ -14,7 +15,7 @@ export interface UserDbInterface extends BaseDbInterface<UserModel> {
     put(id: Filter<UserModel>, body:WithoutId<UserModel>): Promise<HttpMessage>,
 }
 
-export class UserDB extends BaseDb<UserModel> implements UserDbInterface {
+export class UserDb extends BaseDb<UserModel> implements UserDbInterface {
   async post(user: UserModel): Promise<HttpMessage> {
     try {
       const { password = null } = user ?? {};

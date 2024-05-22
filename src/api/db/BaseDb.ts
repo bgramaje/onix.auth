@@ -1,8 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
-  Collection, Db, Document, Filter, ObjectId, WithId,
+  Collection,
+  Db,
+  Document,
+  Filter,
+  WithId,
   WithoutId,
 } from 'mongodb';
-
 import { logger } from '../../config/logger';
 import { HttpMessage } from '../models/HttpMessage';
 
@@ -12,31 +16,35 @@ export interface BaseDbInterface<T extends Document> {
   getById(id: Filter<T>): Promise<WithId<T> | null>,
 }
 
-export abstract class BaseDb<T extends Document = Document> implements BaseDbInterface<T> {
+export abstract class BaseDb<T extends Document> implements BaseDbInterface<T> {
+  private static instances: { [key: string]: BaseDbInterface<any> } = {};
+
   collection: Collection<T>;
 
-  constructor(db: Db, collection: string) {
-    this.collection = db.collection<T>(collection);
+  public constructor(db: Db, collectionName: string) {
+    this.collection = db.collection<T>(collectionName);
   }
 
-  async get(query?: Filter<T>): Promise<WithId<T>[] | []> {
-    try {
-      const entities = await this.collection.find(query ?? {}).toArray();
-      return entities;
-    } catch (error) {
-      logger.error(error);
-      return [];
+  public static getInstance<U extends Document, C extends BaseDb<U>>(
+    Ctor: new (...args: any[]) => C,
+    db: Db,
+    collectionName: string,
+  ): C {
+    if (!BaseDb.instances[collectionName]) {
+      BaseDb.instances[collectionName] = new Ctor(db, collectionName);
     }
+
+    return BaseDb.instances[collectionName] as C;
+  }
+
+  async get(query?: Filter<T>): Promise<WithId<T>[]> {
+    const entities = await this.collection.find(query ?? {}).toArray();
+    return entities;
   }
 
   async getById(id: Filter<T>): Promise<WithId<T> | null> {
-    try {
-      const entity = await this.collection.findOne({ _id: id });
-      return entity;
-    } catch (error) {
-      logger.error(error);
-      return null;
-    }
+    const entity = await this.collection.findOne({ _id: id });
+    return entity;
   }
 
   abstract post(entity: T): Promise<HttpMessage>;

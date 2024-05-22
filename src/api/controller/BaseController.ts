@@ -1,42 +1,42 @@
 import {
   Filter, WithId, WithoutId, Document,
+  Db,
 } from 'mongodb';
 import { NextFunction, Request, Response } from 'express';
 import { BaseDb } from '../db/BaseDb';
 import { logger } from '../../config/logger';
 import { HttpMessage } from '../models/HttpMessage';
+import { UserDb } from '../db/UserDb';
+import { UserModel } from '../models/UserModel';
 
-export interface BaseCtrlInterface<T extends Document> {
-    repository: BaseDb<T>,
+export interface BaseCtrlInterface<U> {
+  repository: U
 }
 
-export abstract class BaseCtrl<T extends Document = Document> implements BaseCtrlInterface<T> {
-  repository : BaseDb<T>;
+export abstract class BaseCtrl<T extends Document, U extends BaseDb<T>> implements BaseCtrlInterface<U> {
+  private static instances: { [key: string]: BaseCtrlInterface<any> } = {};
 
-  constructor(repository: BaseDb<T>) {
+  repository: U;
+
+  public constructor(repository: U) {
     this.repository = repository;
   }
 
-  async get(req: Request, res: Response, next: NextFunction): Promise<void> {
-    const { query = null } = req;
-    const entities = await this.repository.get(query as Filter<T> ?? {});
-    res.status(200).json(entities);
-  }
-
-  async getById(req: Request, res: Response, next: NextFunction): Promise<void> {
-    const { params = {} } = req;
-    const { id = null } = params;
-
-    if (!id) {
-      res.status(404).json({
-        msg: 'Missing \'id\' field',
-      });
-      return;
+  public static getInstance<A extends Document, Z extends BaseDb<A>, C extends BaseCtrl<A, Z>>(
+    Ctor: new (...args: any[]) => C,
+    controllerName: string,
+    db: Db,
+  ): C {
+    if (!BaseCtrl.instances[controllerName]) {
+      BaseCtrl.instances[controllerName] = new Ctor(db);
     }
 
-    const entity = await this.repository.getById(id as unknown as Filter<T> ?? {});
-    res.status(200).json(entity);
+    return BaseCtrl.instances[controllerName] as C;
   }
+
+  abstract get(req: Request, res: Response, next: NextFunction): Promise<void>;
+
+  abstract getById(req: Request, res: Response, next: NextFunction): Promise<void>;
 
   abstract post(req: Request, res: Response, next: NextFunction): Promise<void>;
 
