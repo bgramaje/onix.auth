@@ -21,11 +21,11 @@ export abstract class BaseCtrl<T extends Document, U extends BaseDb<T>> implemen
   }
 
   public static getInstance<C extends BaseCtrl<any, any>>(
-    Ctor: new (db: Db) => C,
-    db: Db,
+    Ctor: new (...args: any[]) => C,
+    ...args: any[]
   ): C {
     if (!BaseCtrl.instances[Ctor.name]) {
-      BaseCtrl.instances[Ctor.name] = new Ctor(db);
+      BaseCtrl.instances[Ctor.name] = new Ctor(...args);
     }
 
     return BaseCtrl.instances[Ctor.name] as C;

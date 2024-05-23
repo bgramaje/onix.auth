@@ -5,16 +5,16 @@ import {
 import expressAsyncHandler from 'express-async-handler';
 
 import { BaseCtrl } from '../controller/BaseController';
-import { UserController } from '../controller/UserController';
+import { LicenseController } from '../controller/LicenseController';
 
-export class UserRouter {
+export class LicenseRouter {
   router: Router;
 
   constructor(db: Db, collection: string) {
     this.router = Router();
 
-    const controller: UserController = BaseCtrl
-      .getInstance<UserController>(UserController, db, collection);
+    const controller: LicenseController = BaseCtrl
+      .getInstance<LicenseController>(LicenseController, db, collection);
 
     this.router.get('/', expressAsyncHandler(controller.get));
     this.router.get('/:id', expressAsyncHandler(controller.getById));

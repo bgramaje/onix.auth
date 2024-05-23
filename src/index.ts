@@ -8,6 +8,9 @@ import cookieParser from 'cookie-parser';
 import compression from 'compression';
 import { logger } from './config/logger';
 import { UserRouter } from './api/router/UserRouter';
+import ROUTES from './config/routes';
+import { TenantRouter } from './api/router/TenantRouter';
+import { LicenseRouter } from './api/router/LicenseRouter';
 
 const {
   MONGO_URL = 'mongodb://localhost:27017/auth',
@@ -37,7 +40,9 @@ app.get('/', (req, res) => {
     logger.info(`Successfully connected to ${MONGO_URL}`);
     const db: Db = client.db(MONGO_DB);
 
-    app.use('/users', new UserRouter(db).router);
+    app.use(ROUTES.USERS, new UserRouter(db, ROUTES.USERS).router);
+    app.use(ROUTES.TENANTS, new TenantRouter(db, ROUTES.TENANTS).router);
+    app.use(ROUTES.LICENSES, new LicenseRouter(db, ROUTES.LICENSES).router);
 
     app.listen(PORT, () => logger.info(`Running 'orion-auth' at ${MONGO_URL}`));
   } catch (error) {

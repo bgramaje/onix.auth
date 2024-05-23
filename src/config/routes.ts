@@ -1,8 +1,8 @@
-type Route = string;
-type RouteAlias = string;
-
-const ROUTES: { [key: RouteAlias]: Route } = {
-    HOME: '/',
-};
+const ROUTES = Object.freeze({
+  HOME: '/',
+  USERS: '/users',
+  TENANTS: '/tenants',
+  LICENSES: '/licenses',
+});
 
 export default ROUTES;

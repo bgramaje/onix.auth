@@ -25,12 +25,11 @@ export abstract class BaseDb<T extends Document> implements BaseDbInterface<T> {
   }
 
   public static getInstance<C extends BaseDb<any>>(
-    Ctor: new (db: Db, collectionName: string) => C,
-    db: Db,
-    collectionName: string,
+    Ctor: new (...args: any[]) => C,
+    ...args: any[]
   ): C {
     if (!BaseDb.instances[Ctor.name]) {
-      BaseDb.instances[Ctor.name] = new Ctor(db, collectionName);
+      BaseDb.instances[Ctor.name] = new Ctor(...args);
     }
 
     return BaseDb.instances[Ctor.name] as C;

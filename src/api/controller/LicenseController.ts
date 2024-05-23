@@ -4,21 +4,21 @@ import {
 
 import { NextFunction, Request, Response } from 'express';
 
-import { UserDb } from '../db/UserDb';
-import { UserModel } from '../models/UserModel';
 import { BaseCtrl } from './BaseController';
 import { BaseDb } from '../db/BaseDb';
+import { LicenseModel } from '../models/LicenseModel';
+import { LicenseDb } from '../db/LicenseDb';
 
-export class UserController extends BaseCtrl<UserModel, UserDb> {
+export class LicenseController extends BaseCtrl<LicenseModel, LicenseDb> {
   constructor(db: Db, collectionName: string) {
-    const repository: UserDb = BaseDb.getInstance<UserDb>(UserDb, db, collectionName);
+    const repository: LicenseDb = BaseDb.getInstance<LicenseDb>(LicenseDb, db, collectionName);
     super(repository);
   }
 
   get = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { query = null } = req;
-      const entities = await this.repository.get(query as Filter<UserModel> ?? {});
+      const entities = await this.repository.get(query as Filter<LicenseModel> ?? {});
       res.status(200).json(entities);
     } catch (error) {
       next(error);
@@ -38,7 +38,7 @@ export class UserController extends BaseCtrl<UserModel, UserDb> {
         return;
       }
 
-      const entity = await this.repository.getById(id as unknown as Filter<UserModel> ?? {});
+      const entity = await this.repository.getById(id as unknown as Filter<LicenseModel> ?? {});
       res.status(200).json(entity);
     } catch (error) {
       next(error);
@@ -50,7 +50,7 @@ export class UserController extends BaseCtrl<UserModel, UserDb> {
       const { body = {} } = req;
       console.log(body);
 
-      const data = await this.repository.post(body as UserModel ?? {});
+      const data = await this.repository.post(body as LicenseModel ?? {});
       res.status(200).json(data);
     } catch (error) {
       next(error);
@@ -67,7 +67,7 @@ export class UserController extends BaseCtrl<UserModel, UserDb> {
         });
         return;
       }
-      const data = await this.repository.put(id as unknown as WithoutId<UserModel>, body);
+      const data = await this.repository.put(id as unknown as WithoutId<LicenseModel>, body);
       res.status(200).json(data);
     } catch (error) {
       next(error);
