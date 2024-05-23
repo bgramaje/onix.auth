@@ -48,8 +48,6 @@ export class UserController extends BaseCtrl<UserModel, UserDb> {
   post = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { body = {} } = req;
-      console.log(body);
-
       const data = await this.repository.post(body as UserModel ?? {});
       res.status(200).json(data);
     } catch (error) {

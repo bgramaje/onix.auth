@@ -46,6 +46,6 @@ app.get('/', (req, res) => {
 
     app.listen(PORT, () => logger.info(`Running 'orion-auth' at ${MONGO_URL}`));
   } catch (error) {
-    console.log(error);
+    logger.error(error);
   }
 })();
