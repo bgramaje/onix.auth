@@ -11,6 +11,7 @@ import { BaseCtrl } from './BaseController';
 import { TenantDb } from '../db/TenantDb';
 import { COLLECTIONS } from '../../config/collections';
 import { TenantModel } from '../models/TenantModel';
+import { LicenseModel } from '../models/LicenseModel';
 
 export class UserController extends BaseCtrl<UserModel, UserDb> {
   constructor(db: Db, collectionName: string) {
@@ -60,7 +61,7 @@ export class UserController extends BaseCtrl<UserModel, UserDb> {
 
       // check if given tenant exists
       const tenantDb: TenantDb = TenantDb.getInstance(db, COLLECTIONS.TENANTS);
-      const tenantEnt: TenantModel | null = await tenantDb.getById(tenant);
+      const tenantEnt: TenantModel & {license: LicenseModel} | null = await tenantDb.getById(tenant as string);
 
       // if no tenant exists or no tenant provided then throw error
       if (!tenant || !tenantEnt) {
@@ -69,6 +70,15 @@ export class UserController extends BaseCtrl<UserModel, UserDb> {
             ? `Tenant with id: '${tenant}' not found.`
             : 'Missing \'tenant\' field',
         );
+      }
+
+      // check license over tenant
+      if (tenantEnt) {
+        const { license = null } = tenantEnt;
+        if (!license) throw new Error(`Provided tenant '${tenant} has no license associated'`);
+        if (license.limitUsers + 1 > tenantEnt.users) {
+          throw new Error(`${tenant} reached the max amount allowed by your license, please upgrade it.`);
+        }
       }
 
       // start of transaction

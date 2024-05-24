@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import {
   Filter,
+  WithId,
   WithoutId,
 } from 'mongodb';
 

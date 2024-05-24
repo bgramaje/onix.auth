@@ -42,7 +42,7 @@ export class TenantController extends BaseCtrl<TenantModel, TenantDb> {
         return;
       }
 
-      const entity = await this.repository.getById(id as unknown as Filter<TenantModel> ?? {});
+      const entity = await this.repository.getById(id as string);
       res.status(200).json(entity);
     } catch (error) {
       next(error);
