@@ -65,7 +65,7 @@ export class LicenseController extends BaseCtrl<LicenseModel, LicenseDb> {
         });
         return;
       }
-      const data = await this.repository.put(id as unknown as WithoutId<LicenseModel>, body);
+      const data = await this.repository.put(id, body);
       res.status(200).json(data);
     } catch (error) {
       next(error);

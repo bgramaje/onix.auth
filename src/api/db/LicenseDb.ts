@@ -10,43 +10,20 @@ import { UserModel } from '../models/UserModel';
 import { HttpMessage } from '../models/HttpMessage';
 import { LicenseModel } from '../models/LicenseModel';
 
-export interface LicenseDbInterface extends BaseDbInterface<LicenseModel> {
-    post(entity: LicenseModel): Promise<HttpMessage>,
-    put(id: Filter<LicenseModel>, body:WithoutId<LicenseModel>): Promise<HttpMessage>,
-}
-
-export class LicenseDb extends BaseDb<LicenseModel> implements LicenseDbInterface {
+export class LicenseDb extends BaseDb<LicenseModel> {
   async post(entity: LicenseModel): Promise<HttpMessage> {
-    try {
-      await this.collection.insertOne(entity);
-      return {
-        status: 200,
-        msg: 'Successfully inserted new user',
-      };
-    } catch (error: unknown) {
-      logger.error(error);
-      return {
-        status: 400,
-        msg: new Error(error as string).message,
-        stack: new Error(error as string).stack,
-      };
-    }
+    await this.collection.insertOne(entity);
+    return {
+      status: 200,
+      msg: 'Successfully inserted new user',
+    };
   }
 
-  async put(id: Filter<LicenseModel>, body: WithoutId<LicenseModel>): Promise<HttpMessage> {
-    try {
-      await this.collection.updateOne({ _id: id }, { $set: { body } });
-      return {
-        status: 200,
-        msg: 'Successfully updated user',
-      };
-    } catch (error) {
-      logger.error(error);
-      return {
-        status: 400,
-        msg: new Error(error as string).message,
-        stack: new Error(error as string).stack,
-      };
-    }
+  async put(id: string, body: any): Promise<HttpMessage> {
+    await this.collection.updateOne({ _id: id }, body);
+    return {
+      status: 200,
+      msg: 'Successfully updated user',
+    };
   }
 }

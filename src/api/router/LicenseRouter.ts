@@ -13,8 +13,7 @@ export class LicenseRouter {
   constructor(db: Db, collection: string) {
     this.router = Router();
 
-    const controller: LicenseController = BaseCtrl
-      .getInstance<LicenseController>(LicenseController, db, collection);
+    const controller: LicenseController = LicenseController.getInstance(db, collection);
 
     this.router.get('/', expressAsyncHandler(controller.get));
     this.router.get('/:id', expressAsyncHandler(controller.getById));

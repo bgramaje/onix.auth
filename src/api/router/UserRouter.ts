@@ -13,8 +13,7 @@ export class UserRouter {
   constructor(db: Db, collection: string) {
     this.router = Router();
 
-    const controller: UserController = BaseCtrl
-      .getInstance<UserController>(UserController, db, collection);
+    const controller: UserController = UserController.getInstance(db, collection);
 
     this.router.get('/', expressAsyncHandler(controller.get));
     this.router.get('/:id', expressAsyncHandler(controller.getById));

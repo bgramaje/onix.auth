@@ -11,6 +11,10 @@ import { UserRouter } from './api/router/UserRouter';
 import ROUTES from './config/routes';
 import { TenantRouter } from './api/router/TenantRouter';
 import { LicenseRouter } from './api/router/LicenseRouter';
+import { COLLECTIONS } from './config/collections';
+
+import { notFoundMiddleware } from './api/middleware/notFoundMiddleware';
+import { errorMiddleware } from './api/middleware/errorMiddleware';
 
 const {
   MONGO_URL = 'mongodb://localhost:27017/auth',
@@ -40,9 +44,21 @@ app.get('/', (req, res) => {
     logger.info(`Successfully connected to ${MONGO_URL}`);
     const db: Db = client.db(MONGO_DB);
 
-    app.use(ROUTES.USERS, new UserRouter(db, ROUTES.USERS).router);
-    app.use(ROUTES.TENANTS, new TenantRouter(db, ROUTES.TENANTS).router);
-    app.use(ROUTES.LICENSES, new LicenseRouter(db, ROUTES.LICENSES).router);
+    app.use((req, res, next) => {
+      req.db = db;
+      req.client = client;
+      next();
+    });
+
+    const { router: userRouter } = new UserRouter(db, COLLECTIONS.USERS);
+    // const { router: tenantRouter } = new TenantRouter(db, COLLECTIONS.TENANTS);
+    // const { router: licenseRouter } = new LicenseRouter(db, COLLECTIONS.LICENSES);
+
+    app.use(ROUTES.USERS, userRouter);
+    // app.use(ROUTES.TENANTS, tenantRouter);
+    // app.use(ROUTES.LICENSES, licenseRouter);
+    app.use(notFoundMiddleware);
+    app.use(errorMiddleware);
 
     app.listen(PORT, () => logger.info(`Running 'orion-auth' at ${MONGO_URL}`));
   } catch (error) {

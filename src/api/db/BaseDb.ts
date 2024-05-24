@@ -11,11 +11,13 @@ import { HttpMessage } from '../models/HttpMessage';
 
 export interface BaseDbInterface<T extends Document> {
   collection: Collection<T>,
-  get(query?: Filter<T>): Promise<WithId<T>[] | []>,
-  getById(id: Filter<T>): Promise<WithId<T> | null>,
+  get(query?: any): Promise<WithId<T>[] | []>,
+  getById(id: any): Promise<WithId<T> | null>,
+  post(entity: T): Promise<HttpMessage>;
+  put(id: string, body: any): Promise<HttpMessage>;
 }
 
-export abstract class BaseDb<T extends Document> implements BaseDbInterface<T> {
+export abstract class BaseDb<T extends Document> {
   private static instances: { [key: string]: BaseDbInterface<any> } = {};
 
   collection: Collection<T>;
@@ -25,27 +27,26 @@ export abstract class BaseDb<T extends Document> implements BaseDbInterface<T> {
   }
 
   public static getInstance<C extends BaseDb<any>>(
-    Ctor: new (...args: any[]) => C,
     ...args: any[]
   ): C {
-    if (!BaseDb.instances[Ctor.name]) {
-      BaseDb.instances[Ctor.name] = new Ctor(...args);
+    const key = this.name;
+    if (!this.instances[key]) {
+      this.instances[key] = new (this as any)(...args);
     }
-
-    return BaseDb.instances[Ctor.name] as C;
+    return this.instances[key] as C;
   }
 
-  get = async (query?: Filter<T>): Promise<WithId<T>[]> => {
+  get = async (query?: any): Promise<WithId<T>[]> => {
     const entities = await this.collection.find(query ?? {}).toArray();
     return entities;
   };
 
-  getById = async (id: Filter<T>): Promise<WithId<T> | null> => {
+  getById = async (id: any): Promise<WithId<T> | null> => {
     const entity = await this.collection.findOne({ _id: id });
     return entity;
   };
 
   abstract post(entity: T): Promise<HttpMessage>;
 
-  abstract put(id: Filter<T>, body: WithoutId<T>): Promise<HttpMessage>;
+  abstract put(id: string, body: any): Promise<HttpMessage>;
 }

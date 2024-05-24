@@ -1,10 +1,4 @@
-/* eslint-disable no-shadow */
-enum Role {
-    Admin = 'Admin',
-    Super = 'Super',
-    Client = 'Client'
-}
-/* eslint-enable no-shadow */
+import { Role } from './RoleModel';
 
 export type UserModel = {
     _id: string,

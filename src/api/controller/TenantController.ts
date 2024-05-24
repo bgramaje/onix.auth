@@ -65,7 +65,7 @@ export class TenantController extends BaseCtrl<TenantModel, TenantDb> {
         });
         return;
       }
-      const data = await this.repository.put(id as unknown as WithoutId<TenantModel>, body);
+      const data = await this.repository.put(id, body);
       res.status(200).json(data);
     } catch (error) {
       next(error);

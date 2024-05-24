@@ -14,8 +14,7 @@ export class TenantRouter {
   constructor(db: Db, collection: string) {
     this.router = Router();
 
-    const controller: TenantController = BaseCtrl
-      .getInstance<TenantController>(TenantController, db, collection);
+    const controller: TenantController = TenantController.getInstance(db, collection);
 
     this.router.get('/', expressAsyncHandler(controller.get));
     this.router.get('/:id', expressAsyncHandler(controller.getById));
