@@ -1,5 +1,6 @@
 import {
   Filter, WithoutId, Db,
+  MongoClient,
 } from 'mongodb';
 
 import { NextFunction, Request, Response } from 'express';
@@ -8,10 +9,13 @@ import { BaseCtrl } from './BaseController';
 import { BaseDb } from '../db/BaseDb';
 import { TenantModel } from '../models/TenantModel';
 import { TenantDb } from '../db/TenantDb';
+import { LicenseDb } from '../db/LicenseDb';
+import { COLLECTIONS } from '../../config/collections';
+import { LicenseModel } from '../models/LicenseModel';
 
 export class TenantController extends BaseCtrl<TenantModel, TenantDb> {
   constructor(db: Db, collectionName: string) {
-    const repository: TenantDb = BaseDb.getInstance<TenantDb>(TenantDb, db, collectionName);
+    const repository: TenantDb = TenantDb.getInstance(db, collectionName);
     super(repository);
   }
 
@@ -47,8 +51,28 @@ export class TenantController extends BaseCtrl<TenantModel, TenantDb> {
 
   post = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { body = {} } = req;
-      const data = await this.repository.post(body as TenantModel ?? {});
+      const { body, db }: { body: TenantModel, db: Db} = req;
+      const {
+        license = null, _id: id, users = 0, activeUsers = [],
+      } = body;
+      // check if tenant already exists
+      const existsTenant: TenantModel | null = await this.repository.getById(id);
+      if (existsTenant) throw new Error(`Tenant with id: ${id} already exists`);
+
+      // check if given license exists
+      const licenseDb: LicenseDb = LicenseDb.getInstance(db, COLLECTIONS.LICENSES);
+      const licenseEnt: LicenseModel | null = await licenseDb.getById(license);
+
+      // if no license exists or no license provided then throw error
+      if (!license || !licenseEnt) {
+        throw new Error(
+          license
+            ? `License with id: '${license}' not found.`
+            : 'Missing \'license\' field',
+        );
+      }
+
+      const data = await this.repository.post({ ...body, users: 0, activeUsers: [] });
       res.status(200).json(data);
     } catch (error) {
       next(error);

@@ -11,7 +11,7 @@ import { LicenseDb } from '../db/LicenseDb';
 
 export class LicenseController extends BaseCtrl<LicenseModel, LicenseDb> {
   constructor(db: Db, collectionName: string) {
-    const repository: LicenseDb = BaseDb.getInstance<LicenseDb>(LicenseDb, db, collectionName);
+    const repository: LicenseDb = LicenseDb.getInstance(db, collectionName);
     super(repository);
   }
 
@@ -48,7 +48,11 @@ export class LicenseController extends BaseCtrl<LicenseModel, LicenseDb> {
   post = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { body = {} } = req;
-      const data = await this.repository.post(body as LicenseModel ?? {});
+      const { name = null } = body;
+
+      if (!name) throw new Error('Missing \'name\' field');
+
+      const data = await this.repository.post(body);
       res.status(200).json(data);
     } catch (error) {
       next(error);

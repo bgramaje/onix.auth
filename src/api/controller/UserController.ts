@@ -1,18 +1,16 @@
 import {
-  Filter, WithoutId, Db,
+  Filter, Db,
   MongoClient,
 } from 'mongodb';
-import { isEmpty } from 'lodash';
+
 import { NextFunction, Request, Response } from 'express';
 
 import { UserDb } from '../db/UserDb';
 import { UserModel } from '../models/UserModel';
 import { BaseCtrl } from './BaseController';
-import { BaseDb } from '../db/BaseDb';
 import { TenantDb } from '../db/TenantDb';
 import { COLLECTIONS } from '../../config/collections';
 import { TenantModel } from '../models/TenantModel';
-import { logger } from '../../config/logger';
 
 export class UserController extends BaseCtrl<UserModel, UserDb> {
   constructor(db: Db, collectionName: string) {
@@ -51,24 +49,20 @@ export class UserController extends BaseCtrl<UserModel, UserDb> {
   };
 
   post = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const {
-      body, db, client,
-    }
-    : {
-      body: UserModel, db: Db, client: MongoClient
-    } = req;
-
+    const { body, db, client }: { body: UserModel, db: Db, client: MongoClient} = req;
     const session = client.startSession();
 
     try {
-      // start transaction
-      session.startTransaction();
-      const { tenant = null } = body;
-      // tenant database
+      const { tenant = null, _id: id } = body;
+      // check if user already exists
+      const existsUser: UserModel | null = await this.repository.getById(id);
+      if (existsUser) throw new Error(`User with id: ${id} already exists`);
+
+      // check if given tenant exists
       const tenantDb: TenantDb = TenantDb.getInstance(db, COLLECTIONS.TENANTS);
-      // retrieve tenant
       const tenantEnt: TenantModel | null = await tenantDb.getById(tenant);
 
+      // if no tenant exists or no tenant provided then throw error
       if (!tenant || !tenantEnt) {
         throw new Error(
           tenant
@@ -77,14 +71,16 @@ export class UserController extends BaseCtrl<UserModel, UserDb> {
         );
       }
 
+      // start of transaction
+      session.startTransaction();
       const data = await this.repository.post(body);
-      // increate in one the amount of users created into the database
+      // increase in one the amount of users created into the database
       await tenantDb.put(tenant, { $inc: { users: 1 } });
-      // commit transaction
       await session.commitTransaction();
+      // end of transaction
       res.status(200).json(data);
     } catch (error) {
-      session.abortTransaction();
+      if (session.inTransaction()) session.abortTransaction();
       next(error);
     } finally {
       session.endSession();

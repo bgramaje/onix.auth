@@ -15,7 +15,7 @@ export class LicenseDb extends BaseDb<LicenseModel> {
     await this.collection.insertOne(entity);
     return {
       status: 200,
-      msg: 'Successfully inserted new user',
+      msg: 'Successfully inserted new license',
     };
   }
 
@@ -23,7 +23,7 @@ export class LicenseDb extends BaseDb<LicenseModel> {
     await this.collection.updateOne({ _id: id }, body);
     return {
       status: 200,
-      msg: 'Successfully updated user',
+      msg: 'Successfully updated license',
     };
   }
 }

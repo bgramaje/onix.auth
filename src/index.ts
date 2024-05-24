@@ -51,12 +51,13 @@ app.get('/', (req, res) => {
     });
 
     const { router: userRouter } = new UserRouter(db, COLLECTIONS.USERS);
-    // const { router: tenantRouter } = new TenantRouter(db, COLLECTIONS.TENANTS);
-    // const { router: licenseRouter } = new LicenseRouter(db, COLLECTIONS.LICENSES);
+    const { router: tenantRouter } = new TenantRouter(db, COLLECTIONS.TENANTS);
+    const { router: licenseRouter } = new LicenseRouter(db, COLLECTIONS.LICENSES);
 
     app.use(ROUTES.USERS, userRouter);
-    // app.use(ROUTES.TENANTS, tenantRouter);
-    // app.use(ROUTES.LICENSES, licenseRouter);
+    app.use(ROUTES.TENANTS, tenantRouter);
+    app.use(ROUTES.LICENSES, licenseRouter);
+
     app.use(notFoundMiddleware);
     app.use(errorMiddleware);
 
