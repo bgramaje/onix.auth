@@ -1,15 +1,7 @@
-import bcrypt from 'bcrypt';
-import {
-  Filter,
-  WithId,
-  WithoutId,
-} from 'mongodb';
 
-import { BaseDb, BaseDbInterface } from './BaseDb';
-import { logger } from '../../config/logger';
-import { UserModel } from '../models/UserModel';
-import { HttpMessage } from '../models/HttpMessage';
-import { LicenseModel } from '../models/LicenseModel';
+import { BaseDb } from './BaseDb.ts';
+import { HttpMessage } from '../models/HttpMessage.ts';
+import { LicenseModel } from '../models/LicenseModel.ts';
 
 export class LicenseDb extends BaseDb<LicenseModel> {
   async post(entity: LicenseModel): Promise<HttpMessage> {

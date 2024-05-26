@@ -1,23 +1,30 @@
-/* eslint-disable @typescript-eslint/no-namespace */
-import express, { Request, Response, NextFunction } from 'express';
 import { Db, MongoClient } from 'mongodb';
+
+import dotenv from 'dotenv';
+dotenv.config();
+
+import express, { Request, Response, NextFunction } from 'express';
+
 import morgan from 'morgan';
 import helmet from 'helmet';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import compression from 'compression';
-import { logger } from './config/logger';
-import { UserRouter } from './api/router/UserRouter';
-import ROUTES from './config/routes';
-import { TenantRouter } from './api/router/TenantRouter';
-import { LicenseRouter } from './api/router/LicenseRouter';
-import { COLLECTIONS } from './config/collections';
 
-import { notFoundMiddleware } from './api/middleware/notFoundMiddleware';
-import { errorMiddleware } from './api/middleware/errorMiddleware';
+
+import { UserRouter } from './api/router/UserRouter.ts';
+import { TenantRouter } from './api/router/TenantRouter.ts';
+import { LicenseRouter } from './api/router/LicenseRouter.ts';
+
+import { COLLECTIONS } from './config/collections.ts';
+import { logger } from './config/logger.ts';
+import { ROUTES } from './config/routes.ts';
+
+import { notFoundMiddleware } from './api/middleware/notFoundMiddleware.ts';
+import { errorMiddleware } from './api/middleware/errorMiddleware.ts';
 
 const {
-  MONGO_URL = 'mongodb://localhost:27017/auth',
+  MONGO_URL = 'mongodb://localhost:27018',
   MONGO_DB = 'auth',
   PORT = 4000,
 } = process.env;
@@ -34,7 +41,7 @@ app.use(compression());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get('/', (req, res) => {
+app.get('/', (_req, res) => {
   res.send('Hello World!');
 });
 
@@ -44,7 +51,7 @@ app.get('/', (req, res) => {
     logger.info(`Successfully connected to ${MONGO_URL}`);
     const db: Db = client.db(MONGO_DB);
 
-    app.use((req, res, next) => {
+    app.use((req: Request, _res: Response, next: NextFunction) => {
       req.db = db;
       req.client = client;
       next();

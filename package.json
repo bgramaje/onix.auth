@@ -3,11 +3,12 @@
   "version": "1.0.0",
   "description": "Authentication Server API",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "ts-node-dev --respawn --transpile-only src/index.ts"
+    "dev": "nodemon --exec tsx src/index.ts",
+    "test": "ts-mocha --require ts-node/register"
   },
   "keywords": [],
   "author": "",
@@ -19,8 +20,10 @@
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "express-async-handler": "^1.2.0",
+    "global-jsdom": "^24.0.0",
     "helmet": "^7.1.0",
     "lodash": "^4.17.21",
     "mongodb": "^6.6.2",
@@ -29,13 +32,18 @@
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
+    "@types/chai": "^4.3.16",
     "@types/compression": "^1.7.5",
     "@types/cookie-parser": "^1.4.7",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
+    "@types/mocha": "^10.0.6",
     "@types/node": "^20.12.12",
     "@typescript-eslint/eslint-plugin": "^5.58.0",
     "@typescript-eslint/parser": "^5.58.0",
+    "chai": "^5.1.1",
+    "chai-http": "^4.4.0",
+    "cross-env": "^7.0.3",
     "eslint": "^8.38.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-next": "^14.2.3",
@@ -43,9 +51,11 @@
     "eslint-plugin-jsx-a11y": "^6.5.1",
     "eslint-plugin-react": "^7.29.4",
     "eslint-plugin-react-hooks": "^4.6.0",
+    "mocha": "^10.4.0",
     "nodemon": "^3.1.0",
+    "ts-mocha": "^10.0.0",
     "ts-node": "^10.9.2",
-    "ts-node-dev": "^2.0.0",
+    "tsx": "^4.11.0",
     "typescript": "^5.4.5"
   }
 }

@@ -4,8 +4,7 @@ import {
 } from 'mongodb';
 import expressAsyncHandler from 'express-async-handler';
 
-import { BaseCtrl } from '../controller/BaseController';
-import { UserController } from '../controller/UserController';
+import { UserController } from '../controller/UserController.ts';
 
 export class UserRouter {
   router: Router;

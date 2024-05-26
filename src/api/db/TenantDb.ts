@@ -1,17 +1,9 @@
-import bcrypt from 'bcrypt';
-import {
-  Filter,
-  WithId,
-  WithoutId,
-} from 'mongodb';
+import { BaseDb } from './BaseDb.ts';
 
-import { BaseDb, BaseDbInterface } from './BaseDb';
-import { logger } from '../../config/logger';
-
-import { HttpMessage } from '../models/HttpMessage';
-import { TenantModel } from '../models/TenantModel';
-import { LicenseModel } from '../models/LicenseModel';
-import { COLLECTIONS } from '../../config/collections';
+import { HttpMessage } from '../models/HttpMessage.ts';
+import { TenantModel } from '../models/TenantModel.ts';
+import { LicenseModel } from '../models/LicenseModel.ts';
+import { COLLECTIONS } from '../../config/collections.ts';
 
 export class TenantDb extends BaseDb<TenantModel> {
   getById = async (id: string): Promise<TenantModel & { license: LicenseModel }| null> => {

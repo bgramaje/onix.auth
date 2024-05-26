@@ -1,4 +1,4 @@
-import { Role } from './RoleModel';
+import { Role } from './RoleModel.ts';
 
 export type UserModel = {
     _id: string,

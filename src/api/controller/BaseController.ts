@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Document,
-  Db,
 } from 'mongodb';
 
 import { NextFunction, Request, Response } from 'express';
-import { BaseDb } from '../db/BaseDb';
+import { BaseDb } from '../db/BaseDb.ts';
 
 export interface BaseCtrlInterface<U> {
   repository: U

@@ -1,13 +1,12 @@
 import {
-  Filter, WithoutId, Db,
+  Filter, Db,
 } from 'mongodb';
 
 import { NextFunction, Request, Response } from 'express';
 
-import { BaseCtrl } from './BaseController';
-import { BaseDb } from '../db/BaseDb';
-import { LicenseModel } from '../models/LicenseModel';
-import { LicenseDb } from '../db/LicenseDb';
+import { BaseCtrl } from './BaseController.ts';
+import { LicenseModel } from '../models/LicenseModel.ts';
+import { LicenseDb } from '../db/LicenseDb.ts';
 
 export class LicenseController extends BaseCtrl<LicenseModel, LicenseDb> {
   constructor(db: Db, collectionName: string) {

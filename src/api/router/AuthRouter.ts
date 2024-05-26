@@ -4,15 +4,15 @@ import {
 } from 'mongodb';
 import expressAsyncHandler from 'express-async-handler';
 
-import { LicenseController } from '../controller/LicenseController.ts';
+import { UserController } from '../controller/UserController.ts';
 
-export class LicenseRouter {
+export class AuthRouter {
   router: Router;
 
   constructor(db: Db, collection: string) {
     this.router = Router();
 
-    const controller: LicenseController = LicenseController.getInstance(db, collection);
+    const controller: UserController = UserController.getInstance(db, collection);
 
     this.router.get('/', expressAsyncHandler(controller.get));
     this.router.get('/:id', expressAsyncHandler(controller.getById));

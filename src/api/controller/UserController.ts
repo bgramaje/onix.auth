@@ -5,13 +5,13 @@ import {
 
 import { NextFunction, Request, Response } from 'express';
 
-import { UserDb } from '../db/UserDb';
-import { UserModel } from '../models/UserModel';
-import { BaseCtrl } from './BaseController';
-import { TenantDb } from '../db/TenantDb';
-import { COLLECTIONS } from '../../config/collections';
-import { TenantModel } from '../models/TenantModel';
-import { LicenseModel } from '../models/LicenseModel';
+import { UserDb } from '../db/UserDb.ts';
+import { UserModel } from '../models/UserModel.ts';
+import { BaseCtrl } from './BaseController.ts';
+import { TenantDb } from '../db/TenantDb.ts';
+import { COLLECTIONS } from '../../config/collections.ts';
+import { TenantModel } from '../models/TenantModel.ts';
+import { LicenseModel } from '../models/LicenseModel.ts';
 
 export class UserController extends BaseCtrl<UserModel, UserDb> {
   constructor(db: Db, collectionName: string) {

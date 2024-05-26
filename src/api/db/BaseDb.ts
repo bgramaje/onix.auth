@@ -3,11 +3,9 @@ import {
   Collection,
   Db,
   Document,
-  Filter,
   WithId,
-  WithoutId,
 } from 'mongodb';
-import { HttpMessage } from '../models/HttpMessage';
+import { HttpMessage } from '../models/HttpMessage.ts';
 
 export interface BaseDbInterface<T extends Document> {
   collection: Collection<T>,

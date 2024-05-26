@@ -1,13 +1,10 @@
 import bcrypt from 'bcrypt';
-import {
-  Filter,
-  WithoutId,
-} from 'mongodb';
 
-import { BaseDb, BaseDbInterface } from './BaseDb';
-import { logger } from '../../config/logger';
-import { UserModel } from '../models/UserModel';
-import { HttpMessage } from '../models/HttpMessage';
+import { BaseDb
+ } from './BaseDb.ts';
+
+import { UserModel } from '../models/UserModel.ts';
+import { HttpMessage } from '../models/HttpMessage.ts';
 
 export class UserDb extends BaseDb<UserModel> {
   async post(user: UserModel): Promise<HttpMessage> {

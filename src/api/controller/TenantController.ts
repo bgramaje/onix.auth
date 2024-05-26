@@ -1,17 +1,15 @@
 import {
-  Filter, WithoutId, Db,
-  MongoClient,
+  Filter, Db,
 } from 'mongodb';
 
 import { NextFunction, Request, Response } from 'express';
 
-import { BaseCtrl } from './BaseController';
-import { BaseDb } from '../db/BaseDb';
-import { TenantModel } from '../models/TenantModel';
-import { TenantDb } from '../db/TenantDb';
-import { LicenseDb } from '../db/LicenseDb';
-import { COLLECTIONS } from '../../config/collections';
-import { LicenseModel } from '../models/LicenseModel';
+import { BaseCtrl } from './BaseController.ts';
+import { TenantModel } from '../models/TenantModel.ts';
+import { TenantDb } from '../db/TenantDb.ts';
+import { LicenseDb } from '../db/LicenseDb.ts';
+import { COLLECTIONS } from '../../config/collections.ts';
+import { LicenseModel } from '../models/LicenseModel.ts';
 
 export class TenantController extends BaseCtrl<TenantModel, TenantDb> {
   constructor(db: Db, collectionName: string) {

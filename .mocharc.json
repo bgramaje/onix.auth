@@ -1,0 +1,7 @@
+{
+    "node-option": ["import=tsx"],
+    "loader": "ts-node/esm",
+    "require": "ts-node/register",
+    "extension": ["ts"],
+    "spec": "tests/**/*.test.ts"
+  }
