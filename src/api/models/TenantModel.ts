@@ -1,6 +1,4 @@
-import { Document } from 'mongodb';
-
-export type TenantModel = Document & {
+export type TenantModel = {
     _id: string,
     name: string,
     license: string,

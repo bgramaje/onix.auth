@@ -5,24 +5,24 @@ import {
 
 import { NextFunction, Request, Response } from 'express';
 
-import { UserDb } from '../db/UserDb.ts';
 import { UserModel } from '../models/UserModel.ts';
-import { BaseCtrl } from './BaseController.ts';
-import { TenantDb } from '../db/TenantDb.ts';
+
 import { COLLECTIONS } from '../../config/collections.ts';
 import { TenantModel } from '../models/TenantModel.ts';
 import { LicenseModel } from '../models/LicenseModel.ts';
+import { Controller } from './Controller.ts';
+import { Repository } from '../repository/Repository.ts';
 
-export class UserController extends BaseCtrl<UserModel, UserDb> {
-  constructor(db: Db, collectionName: string) {
-    const repository: UserDb = UserDb.getInstance(db, collectionName);
+export class UserController extends Controller<UserModel> {
+  constructor(db: Db) {
+    const repository: Repository<UserModel> = Repository.getInstance(COLLECTIONS.USERS, db);
     super(repository);
   }
 
   get = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { query = null } = req;
-      const entities = await this.repository.get(query as Filter<UserModel> ?? {});
+      const { query = {} } = req;
+      const entities = await this.repository.get(query as Filter<UserModel>);
       res.status(200).json(entities);
     } catch (error) {
       next(error);
@@ -42,7 +42,7 @@ export class UserController extends BaseCtrl<UserModel, UserDb> {
         return;
       }
 
-      const entity = await this.repository.getById(id as unknown as Filter<UserModel> ?? {});
+      const entity = await this.repository.getById(id);
       res.status(200).json(entity);
     } catch (error) {
       next(error);
@@ -60,8 +60,12 @@ export class UserController extends BaseCtrl<UserModel, UserDb> {
       if (existsUser) throw new Error(`User with id: ${id} already exists`);
 
       // check if given tenant exists
-      const tenantDb: TenantDb = TenantDb.getInstance(db, COLLECTIONS.TENANTS);
-      const tenantEnt: TenantModel & {license: LicenseModel} | null = await tenantDb.getById(tenant as string);
+      const tenantDb: Repository<TenantModel & { license: LicenseModel }> = Repository
+        .getInstance(COLLECTIONS.TENANTS, db);
+
+      const tenantEnt:
+       TenantModel & {license: LicenseModel} | null = await tenantDb
+         .getById(tenant as string);
 
       // if no tenant exists or no tenant provided then throw error
       if (!tenant || !tenantEnt) {

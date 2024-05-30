@@ -4,20 +4,21 @@ import {
 
 import { NextFunction, Request, Response } from 'express';
 
-import { BaseCtrl } from './BaseController.ts';
 import { LicenseModel } from '../models/LicenseModel.ts';
-import { LicenseDb } from '../db/LicenseDb.ts';
+import { Controller } from './Controller.ts';
+import { Repository } from '../repository/Repository.ts';
+import { COLLECTIONS } from '../../config/collections.ts';
 
-export class LicenseController extends BaseCtrl<LicenseModel, LicenseDb> {
-  constructor(db: Db, collectionName: string) {
-    const repository: LicenseDb = LicenseDb.getInstance(db, collectionName);
+export class LicenseController extends Controller<LicenseModel> {
+  constructor(db: Db) {
+    const repository: Repository<LicenseModel> = Repository.getInstance(COLLECTIONS.LICENSES, db);
     super(repository);
   }
 
   get = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { query = null } = req;
-      const entities = await this.repository.get(query as Filter<LicenseModel> ?? {});
+      const { query = {} } = req;
+      const entities = await this.repository.get(query as Filter<LicenseModel>);
       res.status(200).json(entities);
     } catch (error) {
       next(error);
@@ -37,7 +38,7 @@ export class LicenseController extends BaseCtrl<LicenseModel, LicenseDb> {
         return;
       }
 
-      const entity = await this.repository.getById(id as unknown as Filter<LicenseModel> ?? {});
+      const entity = await this.repository.getById(id);
       res.status(200).json(entity);
     } catch (error) {
       next(error);

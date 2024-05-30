@@ -18,6 +18,7 @@ import { ROUTES } from './config/routes.ts';
 
 import { notFoundMiddleware } from './api/middleware/notFoundMiddleware.ts';
 import { errorMiddleware } from './api/middleware/errorMiddleware.ts';
+import { AuthRouter } from './api/router/AuthRouter.ts';
 
 const {
   MONGO_URL = 'mongodb://localhost:27018',
@@ -57,13 +58,15 @@ app.use(express.urlencoded({ extended: true }));
       });
     });
 
-    const { router: userRouter } = new UserRouter(db, COLLECTIONS.USERS);
-    const { router: tenantRouter } = new TenantRouter(db, COLLECTIONS.TENANTS);
-    const { router: licenseRouter } = new LicenseRouter(db, COLLECTIONS.LICENSES);
+    const userRouter = new UserRouter(db).get();
+    const tenantRouter = new TenantRouter(db).get();
+    const licenseRouter = new LicenseRouter(db).get();
+    const authRouter = new AuthRouter(db).get();
 
     app.use(ROUTES.USERS, userRouter);
     app.use(ROUTES.TENANTS, tenantRouter);
     app.use(ROUTES.LICENSES, licenseRouter);
+    app.use(ROUTES.AUTH, authRouter);
 
     app.use(notFoundMiddleware);
     app.use(errorMiddleware);

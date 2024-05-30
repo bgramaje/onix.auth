@@ -3,4 +3,5 @@ export const ROUTES = Object.freeze({
   USERS: '/users',
   TENANTS: '/tenants',
   LICENSES: '/licenses',
+  AUTH: '/auth',
 });
