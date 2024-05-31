@@ -6,4 +6,4 @@ import { Role } from '../api/models/RoleModel';
  * @param r string
  * @returns true if valid role
  */
-export const isValidRole = (r: string): boolean => Object.values(Role).includes(r);
+export const isValidRole = (r: Role): boolean => Object.values(Role).includes(r);

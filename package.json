@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "nodemon --exec tsx src/index.ts",
+    "dev": "nodemon --env-file=.env --exec tsx src/index.ts",
     "test": "ts-mocha --require ts-node/register"
   },
   "keywords": [],

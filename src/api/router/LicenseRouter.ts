@@ -5,7 +5,7 @@ import {
 import { Router } from './Router.ts';
 import { LicenseController } from '../controller/LicenseController.ts';
 
-export class UserRouter extends Router {
+export class LicenseRouter extends Router {
   constructor(db: Db) {
     const controller = new LicenseController(db);
     super(controller);

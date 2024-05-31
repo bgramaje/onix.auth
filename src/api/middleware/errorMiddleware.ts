@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { logger } from '../../config/logger.ts';
 
 export const errorMiddleware = (err: Error, req: Request, res: Response, next: NextFunction) => {
@@ -9,4 +9,5 @@ export const errorMiddleware = (err: Error, req: Request, res: Response, next: N
     stack: process.env.NODE_ENV === 'production' ? null : err.stack,
   });
   logger.error(err);
+  if (process.env.NODE_ENV !== 'production') logger.error(err.stack);
 };

@@ -21,7 +21,6 @@ const {
 export class AuthController {
   repository: IRepository<AuthModel>;
 
-  // eslint-disable-next-line no-useless-constructor, @typescript-eslint/no-empty-function
   constructor(db: Db) {
     this.repository = Repository
       .getInstance(COLLECTIONS.AUTH, db);
@@ -29,7 +28,10 @@ export class AuthController {
 
   login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { username = null, password = null } = req.body;
+      const {
+        username = null,
+        password = null,
+      } = req.body;
 
       if (!username || !password) {
         throw new Error(
@@ -46,6 +48,8 @@ export class AuthController {
       const user: UserModel| null = await userDb.getById(username as string);
       // error if user not found into ddbb
       if (!user) throw new Error('Missmatch: Wrong username or password');
+      console.log(ACCESS_TOKEN_SECRET);
+
       const validPassword = await bcrypt.compare(password, user.password);
       // error if given password does not match stored one
       if (!validPassword) throw new Error('Missmatch: Wrong username or password');
@@ -55,9 +59,10 @@ export class AuthController {
 
       this.repository.post({
         _id: username,
+        role: user.role,
         username,
         refreshToken,
-        expiredAt: DateTime.fromJSDate(new Date('2022-06-01')).plus({ days: 37 }).toJSDate(),
+        expiredAt: DateTime.fromJSDate(new Date('2022-06-01')).plus({ days: 7 }).toJSDate(),
       });
 
       res.status(200).json({

@@ -13,7 +13,7 @@ export class Repository<T extends DbModel> implements IRepository<T> {
 
   collection: Collection<T>;
 
-  constructor(db: Db, collectionName: string) {
+  constructor(collectionName: string, db: Db) {
     this.collectionName = collectionName;
     this.collection = db.collection<T>(collectionName);
   }
@@ -22,12 +22,10 @@ export class Repository<T extends DbModel> implements IRepository<T> {
     collectionName: string,
     ...args: unknown[]
   ): U {
-    const instance = this.instances.get(collectionName);
+    let instance = this.instances.get(collectionName);
     if (!instance) {
-      this.instances.set(
-        collectionName,
-        new (this as unknown as Constructor<U>)(...args),
-      );
+      instance = new (this as unknown as Constructor<U>)(collectionName, ...args);
+      this.instances.set(collectionName, instance);
     }
     return instance as U;
   }
