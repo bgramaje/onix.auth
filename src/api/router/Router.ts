@@ -1,18 +1,15 @@
 import { Router as ExpressRouter } from 'express';
-import expressAsyncHandler from 'express-async-handler';
 import { IController } from '../interfaces/IController';
-import { authMiddleware } from '../middleware/authMiddleware';
 
-export class Router {
-  router;
+export abstract class Router {
+  router : ExpressRouter;
 
   constructor(controller: IController) {
     this.router = ExpressRouter();
-    this.router.get('/', [authMiddleware], expressAsyncHandler(controller.get));
-    this.router.get('/:id', expressAsyncHandler(controller.getById));
-    this.router.post('/', expressAsyncHandler(controller.post));
-    this.router.put('/:id', expressAsyncHandler(controller.put));
+    this.init(controller);
   }
+
+  abstract init(controller: IController): void;
 
   get = (): ExpressRouter => this.router;
 }

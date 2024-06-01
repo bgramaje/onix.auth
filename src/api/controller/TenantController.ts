@@ -4,6 +4,7 @@ import {
 
 import { NextFunction, Request, Response } from 'express';
 
+import { DateTime } from 'luxon';
 import { TenantModel } from '../models/TenantModel.ts';
 import { COLLECTIONS } from '../../config/collections.ts';
 import { LicenseModel } from '../models/LicenseModel.ts';
@@ -65,7 +66,13 @@ export class TenantController extends Controller<TenantModel> {
       // if no license exists or no license provided then throw error
       if (!licenseEnt) throw new Error(`License with id: '${license}' not found.`);
 
-      const data = await this.repository.post({ ...body, users: 0, activeUsers: [] });
+      const data = await this.repository.post({
+        ...body,
+        users: 0,
+        activeUsers: [],
+        licenseExpirationDate: (DateTime.now().plus({ days: 1 })).toJSDate(),
+      });
+
       res.status(200).json(data);
     } catch (error) {
       next(error);

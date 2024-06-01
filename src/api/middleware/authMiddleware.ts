@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
+import { UserModel } from '../models/UserModel';
 
 const {
   ACCESS_TOKEN_SECRET = '',
@@ -14,11 +15,12 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
   }
 
   try {
-    const decoded: string | JwtPayload = jwt.verify(token, ACCESS_TOKEN_SECRET);
-    req.entity = decoded;
+    const decoded: string | JwtPayload & Partial<UserModel> = jwt.verify(token, ACCESS_TOKEN_SECRET);
+    console.log(decoded);
+    req.self = decoded;
     next();
   } catch (error) {
-    res.status(400);
-    next(new Error('Invalid token'));
+    res.status(403);
+    next(new Error('Not Allowed: Invalid token'));
   }
 };

@@ -4,13 +4,14 @@ import * as express from 'express';
 import { JwtPayload } from 'jsonwebtoken';
 
 import { Db, MongoClient } from 'mongodb';
+import { UserModel } from '../src/api/models/UserModel';
 
 declare global {
   namespace Express {
     interface Request {
       db: Db;
       client: MongoClient;
-      entity: string | JwtPayload;
+      self: string | JwtPayload<UserModel>;
     }
   }
 }

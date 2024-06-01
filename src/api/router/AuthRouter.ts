@@ -1,19 +1,16 @@
-import { Router } from 'express';
-
 import expressAsyncHandler from 'express-async-handler';
 
 import { Db } from 'mongodb';
 import { AuthController } from '../controller/AuthController.ts';
+import { Router } from './Router.ts';
 
-export class AuthRouter {
-  router: Router;
-
+export class AuthRouter extends Router {
   constructor(db: Db) {
-    this.router = Router();
-
-    const controller = new AuthController(db);
-    this.router.post('/login', expressAsyncHandler(controller.login));
+    const controller: AuthController = new AuthController(db);
+    super(controller);
   }
 
-  get = (): Router => this.router;
+  init(controller: AuthController): void {
+    this.router.post('/login', expressAsyncHandler(controller.login));
+  }
 }
