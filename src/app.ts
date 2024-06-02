@@ -35,6 +35,7 @@ app.use(cookieParser());
 app.use(compression());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.disable('x-powered-by'); // hide express server headers information
 
 export const setup = async () => {
   await client.connect();

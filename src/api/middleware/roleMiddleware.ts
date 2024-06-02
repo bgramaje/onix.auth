@@ -19,7 +19,7 @@ export const isAdminMiddleware = (req : Request, res: Response, next: NextFuncti
   if (!self) {
     res.status(403);
     next(new Error('Error: You are not authenticated in the server'));
-  } else if (self.role === Role.Admin) next();
+  } else if (self.role === Role.Admin || self.role === Role.Super) next();
   else {
     res.status(403);
     next(new Error('Not allowed'));

@@ -20,7 +20,7 @@ export class LicenseRouter extends Router {
     /** check if user decoded from token is super */
     this.router.all('*', isSuperMiddlware);
     /** licenses endpoints */
-    this.router.get('/', authMiddleware, expressAsyncHandler(controller.get));
+    this.router.get('/', expressAsyncHandler(controller.get));
     this.router.get('/:id', expressAsyncHandler(controller.getById));
     this.router.post('/', expressAsyncHandler(controller.post));
     this.router.put('/:id', expressAsyncHandler(controller.put));

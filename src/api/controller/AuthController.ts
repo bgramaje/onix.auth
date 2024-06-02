@@ -9,11 +9,12 @@ import { Db } from 'mongodb';
 
 import { COLLECTIONS } from '../../config/collections';
 import { UserModel } from '../models/UserModel';
-import { verifyToken } from '../../utils/auth';
 import { AuthModel } from '../models/AuthModel';
 import { Repository } from '../repository/Repository';
 import { Controller } from './Controller';
 import { TOKEN_SCOPE } from '../../config/config';
+
+import { verifyToken } from '../../utils/auth';
 import { parseDuration } from '../../utils/time';
 
 const {
@@ -64,7 +65,7 @@ export class AuthController extends Controller<AuthModel> {
       const refreshToken = jwt.sign(user, REFRESH_TOKEN_SECRET, { expiresIn: REFRESH_TOKEN_DEFAULT_EXPIRACY });
 
       this.repository.post({
-        _id: username,
+        _id: `token-${username}`,
         role: user.role,
         username,
         refreshToken,
