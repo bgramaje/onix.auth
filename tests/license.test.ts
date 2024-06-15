@@ -1,16 +1,26 @@
-import test, { Response } from 'supertest';
-import { describe } from 'mocha';
-import app from '../src/app';
+/* eslint-disable func-names */
+/* eslint-disable prefer-arrow-callback */
+import { use, expect } from 'chai';
+import chaiHttp from 'chai-http';
+import { Db, Document, MongoClient } from 'mongodb';
+import { Express } from 'express';
+import 'mocha';
+import { ROUTES } from '../src/config/routes';
+import { setup } from '../src/app';
 
-describe('licenses', () => {
-  it('should return all licenses', async () => {
-    test(app)
-      .get('/licenses')
-      .expect('Content-Type', 'application/json; charset=utf-8')
-      .expect(200)
-      .end((err: Error, _res: Response) => {
-        console.log(_res.body);
-        if (err) throw err;
-      });
+const chai = use(chaiHttp);
+
+const {
+  MONGO_URL = 'mongodb://localhost:27018',
+  MONGO_DB = 'auth-test',
+} = process.env;
+
+describe('licenses', function () {
+  let client: MongoClient;
+  let app: Express;
+
+  before(async () => {
+    client = await MongoClient.connect(MONGO_URL);
+    app = await setup(client, MONGO_DB, false);
   });
 });

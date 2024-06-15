@@ -12,6 +12,7 @@ declare global {
       db: Db;
       client: MongoClient;
       self: string | JwtPayload<UserModel>;
+      debug: boolean
     }
   }
 }

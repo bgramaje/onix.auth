@@ -1,6 +1,8 @@
 import { Db, MongoClient } from 'mongodb';
 
-import express, { Request, Response, NextFunction } from 'express';
+import express, {
+  Express, Request, Response, NextFunction,
+} from 'express';
 
 import morgan from 'morgan';
 import helmet from 'helmet';
@@ -12,38 +14,35 @@ import { UserRouter } from './api/router/UserRouter.ts';
 import { TenantRouter } from './api/router/TenantRouter.ts';
 import { LicenseRouter } from './api/router/LicenseRouter.ts';
 
-import { logger } from './config/logger.ts';
 import { ROUTES } from './config/routes.ts';
 
 import { notFoundMiddleware } from './api/middleware/notFoundMiddleware.ts';
 import { errorMiddleware } from './api/middleware/errorMiddleware.ts';
 import { AuthRouter } from './api/router/AuthRouter.ts';
 
-const {
-  MONGO_URL = 'mongodb://localhost:27017',
-  MONGO_DB = 'auth',
-} = process.env;
+export const setup = async (
+  client : MongoClient,
+  mongoDb: string,
+  debug = true,
+): Promise<Express> => {
+  const app = express();
 
-const client = new MongoClient(MONGO_URL);
+  if (debug) app.use(morgan(':remote-addr :method :url :status :res[content-length] - :response-time ms'));
+  app.use(helmet());
+  app.use(cors());
+  app.use(cookieParser());
+  app.use(compression());
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
 
-export const app = express();
+  // hide express server headers information
+  app.disable('x-powered-by');
 
-app.use(morgan(':remote-addr :method :url :status :res[content-length] - :response-time ms'));
-app.use(helmet());
-app.use(cors());
-app.use(cookieParser());
-app.use(compression());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.disable('x-powered-by'); // hide express server headers information
-
-export const setup = async () => {
-  await client.connect();
-  logger.info(`Successfully connected to ${MONGO_URL}`);
-  const db: Db = client.db(MONGO_DB);
+  const db: Db = client.db(mongoDb);
 
   app.use((req: Request, res: Response, next: NextFunction) => {
     req.db = db;
+    req.debug = debug;
     req.client = client;
     res.set({ 'content-type': 'application/json; charset=utf-8' });
     next();
@@ -68,5 +67,6 @@ export const setup = async () => {
 
   app.use(notFoundMiddleware);
   app.use(errorMiddleware);
+
   return app;
 };
