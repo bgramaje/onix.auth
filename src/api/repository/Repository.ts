@@ -1,12 +1,13 @@
 import {
   Collection, Db, Filter, OptionalUnlessRequiredId,
 } from 'mongodb';
+
 import { HttpMessage } from '../models/HttpMessage';
-import { DbModel, IRepository } from '../interfaces/IRepository';
+import { IRepository } from '../interfaces/IRepository';
+import { IDbModel } from '../interfaces/IDbModel';
+import { HttpStatusCode } from '../../enums/HttpStatusCode';
 
-export type Constructor<T> = new (...args: unknown[]) => T;
-
-export class Repository<T extends DbModel> implements IRepository<T> {
+export class Repository<T extends IDbModel> implements IRepository<T> {
   public static instances: Map<string, object> = new Map();
 
   collectionName: string;
@@ -18,16 +19,16 @@ export class Repository<T extends DbModel> implements IRepository<T> {
     this.collection = db.collection<T>(collectionName);
   }
 
-  static getInstance<X extends DbModel, U extends IRepository<X>>(
+  static getInstance<U extends IDbModel>(
     collectionName: string,
-    ...args: unknown[]
-  ): U {
-    let instance = this.instances.get(collectionName);
+    db: Db,
+  ): Repository<U> {
+    let instance: object | undefined = this.instances.get(collectionName);
     if (!instance) {
-      instance = new (this as unknown as Constructor<U>)(collectionName, ...args);
+      instance = new this(collectionName, db) as Repository<U>;
       this.instances.set(collectionName, instance);
     }
-    return instance as U;
+    return instance as Repository<U>;
   }
 
   post = async (entity: T): Promise<Partial<HttpMessage>> => {
@@ -35,7 +36,7 @@ export class Repository<T extends DbModel> implements IRepository<T> {
     if (!_id) throw new Error('[error] missing \'_id\' field');
     await this.collection.insertOne(entity as OptionalUnlessRequiredId<T>);
     return {
-      status: 200,
+      status: HttpStatusCode.CREATED,
       msg: 'Successfully inserted new entity',
     };
   };
@@ -43,17 +44,17 @@ export class Repository<T extends DbModel> implements IRepository<T> {
   put = async (id: string, query: object): Promise<Partial<HttpMessage>> => {
     const filter : Filter<T> = { _id: id } as Filter<T>;
     await this.collection.updateOne(filter, query);
-    return { status: 200 };
+    return { status: HttpStatusCode.OK };
   };
 
-  get = async (query: object): Promise<T[]> => {
-    const entities: T[] = await this.collection.find(query).toArray() as T[];
+  get = async (query: object, opts?: object): Promise<T[]> => {
+    const entities = await this.collection.find(query, opts).toArray() as T[];
     return entities;
   };
 
-  getById = async (id: string): Promise<T | null> => {
+  getById = async (id: string, opts?: object): Promise<T | null> => {
     const filter : Filter<T> = { _id: id } as Filter<T>;
-    const entity: T | null = await this.collection.findOne(filter) as T | null;
+    const entity = await this.collection.findOne(filter, opts) as T | null;
     return entity;
   };
 }

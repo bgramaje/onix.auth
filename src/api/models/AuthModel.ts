@@ -1,7 +1,7 @@
+import { IDbModel } from '../interfaces/IDbModel';
 import { Role } from './RoleModel';
 
-export type AuthModel = {
-    _id: string,
+export interface AuthModel extends IDbModel {
     username: string,
     refreshToken: string,
     expiredAt: Date,

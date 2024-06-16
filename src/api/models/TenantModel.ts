@@ -1,5 +1,6 @@
-export type TenantModel = {
-    _id: string,
+import { IDbModel } from '../interfaces/IDbModel';
+
+export interface TenantModel extends IDbModel {
     name: string,
     license: string,
     licenseExpirationDate: Date;

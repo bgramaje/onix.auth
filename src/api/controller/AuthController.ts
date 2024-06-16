@@ -16,6 +16,8 @@ import { TOKEN_SCOPE } from '../../config/config';
 
 import { verifyToken } from '../../utils/auth';
 import { parseDuration } from '../../utils/time';
+import { HttpStatusCode } from '../../enums/HttpStatusCode';
+import { UserRepository } from '../repository/UserRepository';
 
 const {
   ACCESS_TOKEN_SECRET = '',
@@ -26,7 +28,8 @@ const {
 
 export class AuthController extends Controller<AuthModel> {
   constructor(db: Db) {
-    const repository: Repository<AuthModel> = Repository.getInstance(COLLECTIONS.AUTH, db);
+    const repository: Repository<AuthModel> = Repository
+      .getInstance<AuthModel>(COLLECTIONS.AUTH, db);
     super(repository);
   }
 
@@ -37,16 +40,15 @@ export class AuthController extends Controller<AuthModel> {
         password = null,
       } = req.body;
 
+      // check required fields
       if (!username || !password) {
         throw new Error('Missing \'required\' fields for authentication');
       }
 
       // user repository
-      const userDb: Repository<UserModel> = Repository
-        .getInstance(COLLECTIONS.USERS, req.db);
-
-      const user: UserModel | null = await userDb.getById(username as string);
+      const userDb = UserRepository.getInstance(COLLECTIONS.USERS, req.db) as UserRepository;
       // error if user not found into ddbb
+      const user = await userDb.getByUsername(username);
       if (!user) throw new Error('Missmatch: Wrong username or password');
 
       const validPassword = await bcrypt.compare(password, user.password);
@@ -65,15 +67,15 @@ export class AuthController extends Controller<AuthModel> {
       const refreshToken = jwt.sign(user, REFRESH_TOKEN_SECRET, { expiresIn: REFRESH_TOKEN_DEFAULT_EXPIRACY });
 
       this.repository.post({
-        _id: `token-${username}`,
+        _id: user._id,
         role: user.role,
         username,
         refreshToken,
         expiredAt: (DateTime.now().plus(parseDuration(REFRESH_TOKEN_DEFAULT_EXPIRACY))).toJSDate(),
       });
 
-      res.status(200).json({
-        status: 200,
+      res.status(HttpStatusCode.OK).json({
+        status: HttpStatusCode.OK,
         accessToken,
         refreshToken,
       });
@@ -98,19 +100,23 @@ export class AuthController extends Controller<AuthModel> {
     }
   };
 
-  get = async (_req: Request, _res: Response, next: NextFunction): Promise<void> => {
+  get = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+    res.status(HttpStatusCode.METHOD_NOT_ALLOWED);
     next(new Error('Method not allowed.'));
   };
 
-  getById = async (_req: Request, _res: Response, next: NextFunction): Promise<void> => {
+  getById = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+    res.status(HttpStatusCode.METHOD_NOT_ALLOWED);
     next(new Error('Method not allowed.'));
   };
 
-  post = async (_req: Request, _res: Response, next: NextFunction): Promise<void> => {
+  post = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+    res.status(HttpStatusCode.METHOD_NOT_ALLOWED);
     next(new Error('Method not allowed.'));
   };
 
-  put = async (_req: Request, _res: Response, next: NextFunction): Promise<void> => {
+  put = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+    res.status(HttpStatusCode.METHOD_NOT_ALLOWED);
     next(new Error('Method not allowed.'));
   };
 }

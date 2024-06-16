@@ -1,0 +1,1 @@
+[{"$lookup": { "from": "tenants", "localField": "tenant", "foreignField": "_id", "as": "tenant"} }, { "$unwind": "$tenant" }] 

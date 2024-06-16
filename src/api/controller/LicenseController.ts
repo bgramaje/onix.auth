@@ -51,8 +51,6 @@ export class LicenseController extends Controller<LicenseModel> {
       const { name = null } = body;
 
       if (!name) throw new Error('Missing \'name\' field');
-      console.log(this.repository);
-
       const data = await this.repository.post(body);
       res.status(200).json(data);
     } catch (error) {

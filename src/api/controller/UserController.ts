@@ -4,26 +4,47 @@ import {
 } from 'mongodb';
 
 import { NextFunction, Request, Response } from 'express';
+import isEmpty from 'lodash/isEmpty';
 
-import { UserModel } from '../models/UserModel.ts';
+import { AggregatedUserModel, UserModel } from '../models/UserModel.ts';
 
 import { COLLECTIONS } from '../../config/collections.ts';
 import { TenantModel } from '../models/TenantModel.ts';
 import { LicenseModel } from '../models/LicenseModel.ts';
 import { Controller } from './Controller.ts';
 import { Repository } from '../repository/Repository.ts';
+import { UserRepository } from '../repository/UserRepository.ts';
+import { HttpStatusCode } from '../../enums/HttpStatusCode.ts';
+import { parseArgs } from '../../utils/utils.ts';
 
 export class UserController extends Controller<UserModel> {
+  repository: UserRepository;
+
   constructor(db: Db) {
-    const repository: Repository<UserModel> = Repository.getInstance(COLLECTIONS.USERS, db);
-    super(repository);
+    const repository = UserRepository.getInstance(COLLECTIONS.USERS, db) as UserRepository;
+    super(repository as UserRepository);
+    this.repository = repository;
   }
 
   get = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { query = {} } = req;
-      const entities = await this.repository.get(query as Filter<UserModel>);
-      res.status(200).json(entities);
+      const {
+        filter = '{}',
+        opts = '{}',
+        aggregate = null,
+      } = query;
+
+      if (!isEmpty(aggregate)) {
+        const parsedAggregate = parseArgs('aggregate', aggregate as string, res, next);
+        const entities = await this.repository.getAggregated(parsedAggregate) as AggregatedUserModel[];
+        res.status(HttpStatusCode.OK).json(entities);
+      } else {
+        const parsedOpts = parseArgs('opts', opts as string, res, next);
+        const parsedFilter = parseArgs('filter', filter as string, res, next);
+        const entities = await this.repository.get(parsedFilter as Filter<UserModel>, parsedOpts) as UserModel[];
+        res.status(HttpStatusCode.OK).json(entities);
+      }
     } catch (error) {
       next(error);
     }
@@ -31,19 +52,34 @@ export class UserController extends Controller<UserModel> {
 
   getById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { params = {} } = req;
+      const {
+        params = {},
+        query = {},
+      } = req;
+
       const { id = null } = params;
+      const {
+        opts = '{}',
+        aggregate = null,
+      } = query;
 
       if (!id) {
-        res.status(500).json({
-          status: 500,
+        res.status(HttpStatusCode.BAD_REQUEST).json({
+          status: HttpStatusCode.BAD_REQUEST,
           msg: 'Missing \'id\' field',
         });
         return;
       }
 
-      const entity = await this.repository.getById(id);
-      res.status(200).json(entity);
+      if (!isEmpty(aggregate)) {
+        const parsedAggregate = parseArgs('aggregate', aggregate as string, res, next);
+        const entity = await this.repository.getByIdAggregated(id as string, parsedAggregate) as AggregatedUserModel;
+        res.status(HttpStatusCode.OK).json(entity);
+      } else {
+        const parsedOpts = parseArgs('opts', opts as string, res, next);
+        const entity = await this.repository.getById(id as string, parsedOpts) as UserModel;
+        res.status(HttpStatusCode.OK).json(entity);
+      }
     } catch (error) {
       next(error);
     }
@@ -92,7 +128,7 @@ export class UserController extends Controller<UserModel> {
       await tenantDb.put(tenant, { $inc: { users: 1 } });
       await session.commitTransaction();
       // end of transaction
-      res.status(200).json(data);
+      res.status(data.status || HttpStatusCode.CREATED).json(data);
     } catch (error) {
       if (session.inTransaction()) session.abortTransaction();
       next(error);
@@ -105,12 +141,14 @@ export class UserController extends Controller<UserModel> {
     try {
       const { params = {}, body = {} } = req;
       const { id = null } = params;
+
       if (!id) {
         res.status(404).json({
           msg: 'Missing \'id\' field',
         });
         return;
       }
+
       const data = await this.repository.put(id, body);
       res.status(200).json(data);
     } catch (error) {
