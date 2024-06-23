@@ -1,9 +1,17 @@
 import { IDbModel } from '../interfaces/IDbModel';
+import { LicenseModel } from './LicenseModel';
 
-export interface TenantModel extends IDbModel {
+interface BaseTenantModel extends IDbModel {
     name: string,
-    license: string,
     licenseExpirationDate: Date;
     users: number;
     activeUsers: Array<string>
+}
+
+export interface TenantModel extends BaseTenantModel {
+    license: string,
+}
+
+export interface AggregatedTenantModel extends BaseTenantModel {
+    license: LicenseModel
 }

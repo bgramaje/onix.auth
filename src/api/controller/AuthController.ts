@@ -8,7 +8,6 @@ import jwt from 'jsonwebtoken';
 import { Db } from 'mongodb';
 
 import { COLLECTIONS } from '../../config/collections';
-import { UserModel } from '../models/UserModel';
 import { AuthModel } from '../models/AuthModel';
 import { Repository } from '../repository/Repository';
 import { Controller } from './Controller';
@@ -18,33 +17,33 @@ import { verifyToken } from '../../utils/auth';
 import { parseDuration } from '../../utils/time';
 import { HttpStatusCode } from '../../enums/HttpStatusCode';
 import { UserRepository } from '../repository/UserRepository';
+import { checkArgs } from '../../utils/utils';
+import { AuthRepository } from '../repository/AuthRepository';
 
 const {
   ACCESS_TOKEN_SECRET = '',
   REFRESH_TOKEN_SECRET = '',
-  REFRESH_TOKEN_DEFAULT_EXPIRACY = '7d',
-  ACCESS_TOKEN_DEFAULT_EXPIRACY = '15m',
+  REFRESH_TOKEN_EXPIRACY = '7d',
+  ACCESS_TOKEN_EXPIRACY = '15m',
 } = process.env;
 
 export class AuthController extends Controller<AuthModel> {
   constructor(db: Db) {
-    const repository: Repository<AuthModel> = Repository
+    const repository: Repository<AuthModel> = AuthRepository
       .getInstance<AuthModel>(COLLECTIONS.AUTH, db);
     super(repository);
   }
 
   login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const { body } = req;
+    const {
+      username = null,
+      password = null,
+    } = body;
+
     try {
-      const {
-        username = null,
-        password = null,
-      } = req.body;
-
       // check required fields
-      if (!username || !password) {
-        throw new Error('Missing \'required\' fields for authentication');
-      }
-
+      checkArgs(['username, password'], body, res);
       // user repository
       const userDb = UserRepository.getInstance(COLLECTIONS.USERS, req.db) as UserRepository;
       // error if user not found into ddbb
@@ -60,18 +59,18 @@ export class AuthController extends Controller<AuthModel> {
       let options = {};
 
       if (scope !== TOKEN_SCOPE.PERMANENT) {
-        options = { expiresIn: ACCESS_TOKEN_DEFAULT_EXPIRACY };
+        options = { expiresIn: ACCESS_TOKEN_EXPIRACY };
       }
 
       const accessToken = jwt.sign(user, ACCESS_TOKEN_SECRET, options);
-      const refreshToken = jwt.sign(user, REFRESH_TOKEN_SECRET, { expiresIn: REFRESH_TOKEN_DEFAULT_EXPIRACY });
+      const refreshToken = jwt.sign(user, REFRESH_TOKEN_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRACY });
 
       this.repository.post({
         _id: user._id,
         role: user.role,
         username,
         refreshToken,
-        expiredAt: (DateTime.now().plus(parseDuration(REFRESH_TOKEN_DEFAULT_EXPIRACY))).toJSDate(),
+        expiredAt: (DateTime.now().plus(parseDuration(REFRESH_TOKEN_EXPIRACY))).toJSDate(),
       });
 
       res.status(HttpStatusCode.OK).json({

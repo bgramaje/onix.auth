@@ -8,6 +8,8 @@ import { LicenseModel } from '../models/LicenseModel.ts';
 import { Controller } from './Controller.ts';
 import { Repository } from '../repository/Repository.ts';
 import { COLLECTIONS } from '../../config/collections.ts';
+import { HttpStatusCode } from '../../enums/HttpStatusCode.ts';
+import { checkArgs, parseArgs } from '../../utils/utils.ts';
 
 export class LicenseController extends Controller<LicenseModel> {
   constructor(db: Db) {
@@ -18,8 +20,11 @@ export class LicenseController extends Controller<LicenseModel> {
   get = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { query = {} } = req;
-      const entities = await this.repository.get(query as Filter<LicenseModel>);
-      res.status(200).json(entities);
+      const { filter = '{}', opts = '{}' } = query;
+      const parsedOpts = parseArgs('opts', opts as string, res);
+      const parsedFilter = parseArgs('filter', filter as string, res);
+      const entities = await this.repository.get(parsedFilter as Filter<LicenseModel>, parsedOpts) as LicenseModel[];
+      res.status(HttpStatusCode.OK).json(entities);
     } catch (error) {
       next(error);
     }
@@ -27,19 +32,16 @@ export class LicenseController extends Controller<LicenseModel> {
 
   getById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { params = {} } = req;
+      const { params = {}, query = {} } = req;
+
       const { id = null } = params;
+      const { opts = '{}' } = query;
 
-      if (!id) {
-        res.status(500).json({
-          status: 500,
-          msg: 'Missing \'id\' field',
-        });
-        return;
-      }
+      checkArgs(['id'], params, res);
 
-      const entity = await this.repository.getById(id);
-      res.status(200).json(entity);
+      const parsedOpts = parseArgs('opts', opts as string, res);
+      const entity = await this.repository.getById(id as string, parsedOpts) as LicenseModel;
+      res.status(HttpStatusCode.OK).json(entity);
     } catch (error) {
       next(error);
     }
@@ -48,9 +50,8 @@ export class LicenseController extends Controller<LicenseModel> {
   post = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { body = {} } = req;
-      const { name = null } = body;
 
-      if (!name) throw new Error('Missing \'name\' field');
+      checkArgs(['name'], body, res);
       const data = await this.repository.post(body);
       res.status(200).json(data);
     } catch (error) {

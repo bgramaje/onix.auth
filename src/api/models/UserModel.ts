@@ -1,14 +1,17 @@
 import { IDbModel } from '../interfaces/IDbModel.ts';
-import { LicenseModel } from './LicenseModel.ts';
 import { Role } from './RoleModel.ts';
+import { TenantModel } from './TenantModel.ts';
 
-export interface UserModel extends IDbModel {
+interface BaseUserModel extends IDbModel {
     username: string,
-    tenant?: string | null,
     role: Role.Super | Role.Admin | Role.Client,
     password: string,
 }
 
-export interface AggregatedUserModel extends UserModel {
-    license: LicenseModel
+export interface UserModel extends BaseUserModel {
+    tenant?: string | null,
+}
+
+export interface AggregatedUserModel extends BaseUserModel {
+    tenant?: TenantModel | null
 }

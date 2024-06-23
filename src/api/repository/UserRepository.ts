@@ -9,44 +9,22 @@ import { Repository } from './Repository';
 import { AggregatedUserModel, UserModel } from '../models/UserModel';
 import { HttpStatusCode } from '../../enums/HttpStatusCode';
 
-const BASE_AGGREGATION = [
-  {
-    $lookup: {
-      from: 'tenants',
-      localField: 'tenant',
-      foreignField: '_id',
-      as: 'tenant',
-    },
-  },
-  {
-    $unwind: '$tenant',
-  },
-];
-
 export class UserRepository extends Repository<UserModel> {
-  getAggregated = async (aggregate: []): Promise<AggregatedUserModel[]> => {
-    const entity = await this.collection.aggregate(aggregate as Document[]).toArray() as AggregatedUserModel[];
+  getAggregated = async (pipeline: any[]): Promise<AggregatedUserModel[]> => {
+    const entity = await this.collection
+      .aggregate<AggregatedUserModel>(pipeline as Document[])
+      .toArray() as AggregatedUserModel[];
     return entity;
   };
 
-  getByIdAggregated = async (_id: string, aggregate: []): Promise<AggregatedUserModel> => {
+  getByIdAggregated = async (_id: string, pipeline: any[]): Promise<AggregatedUserModel> => {
     const entity = (
-      await this.collection.aggregate([
-        ...aggregate,
-        { $match: { _id } },
-        { $limit: 1 },
-      ]).toArray()
-    )[0] as AggregatedUserModel;
-    return entity;
-  };
-
-  getByUsernameAggregated = async (username: string, aggregate: []): Promise<AggregatedUserModel> => {
-    const entity = (
-      await this.collection.aggregate([
-        ...aggregate,
-        { $match: { username } },
-        { $limit: 1 },
-      ]).toArray()
+      await this.collection
+        .aggregate<AggregatedUserModel>([
+          ...pipeline,
+          { $match: { _id } },
+          { $limit: 1 },
+        ]).toArray()
     )[0] as AggregatedUserModel;
     return entity;
   };

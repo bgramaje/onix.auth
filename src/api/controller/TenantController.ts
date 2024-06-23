@@ -3,25 +3,42 @@ import {
 } from 'mongodb';
 
 import { NextFunction, Request, Response } from 'express';
+import isEmpty from 'lodash/isEmpty';
 
 import { DateTime } from 'luxon';
-import { TenantModel } from '../models/TenantModel.ts';
+import { AggregatedTenantModel, TenantModel } from '../models/TenantModel.ts';
 import { COLLECTIONS } from '../../config/collections.ts';
 import { LicenseModel } from '../models/LicenseModel.ts';
 import { Controller } from './Controller.ts';
 import { Repository } from '../repository/Repository.ts';
+import { TenantRepository } from '../repository/TenantRepository.ts';
+import { checkArgs, parseArgs } from '../../utils/utils.ts';
+import { HttpStatusCode } from '../../enums/HttpStatusCode.ts';
 
 export class TenantController extends Controller<TenantModel> {
+  repository: TenantRepository;
+
   constructor(db: Db) {
-    const repository: Repository<TenantModel> = Repository.getInstance(COLLECTIONS.TENANTS, db);
+    const repository = TenantRepository.getInstance(COLLECTIONS.TENANTS, db) as TenantRepository;
     super(repository);
+    this.repository = repository;
   }
 
   get = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { query = null } = req;
-      const entities = await this.repository.get(query as Filter<TenantModel> ?? {});
-      res.status(200).json(entities);
+      const { query = {} } = req;
+      const { filter = '{}', opts = '{}', aggregate = null } = query;
+
+      if (!isEmpty(aggregate)) {
+        const parsedAggregate = parseArgs('aggregate', aggregate as string, res);
+        const entities = await this.repository.getAggregated(parsedAggregate) as AggregatedTenantModel[];
+        res.status(HttpStatusCode.OK).json(entities);
+      } else {
+        const parsedOpts = parseArgs('opts', opts as string, res);
+        const parsedFilter = parseArgs('filter', filter as string, res);
+        const entities = await this.repository.get(parsedFilter as Filter<TenantModel>, parsedOpts) as TenantModel[];
+        res.status(HttpStatusCode.OK).json(entities);
+      }
     } catch (error) {
       next(error);
     }
@@ -29,19 +46,22 @@ export class TenantController extends Controller<TenantModel> {
 
   getById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { params = {} } = req;
+      const { params = {}, query = {} } = req;
+
       const { id = null } = params;
+      const { opts = '{}', aggregate = null } = query;
 
-      if (!id) {
-        res.status(500).json({
-          status: 500,
-          msg: 'Missing \'id\' field',
-        });
-        return;
+      checkArgs(['id'], params, res);
+
+      if (!isEmpty(aggregate)) {
+        const parsedAggregate = parseArgs('aggregate', aggregate as string, res);
+        const entity = await this.repository.getByIdAggregated(id as string, parsedAggregate) as AggregatedTenantModel;
+        res.status(HttpStatusCode.OK).json(entity);
+      } else {
+        const parsedOpts = parseArgs('opts', opts as string, res);
+        const entity = await this.repository.getById(id as string, parsedOpts) as TenantModel;
+        res.status(HttpStatusCode.OK).json(entity);
       }
-
-      const entity = await this.repository.getById(id as string);
-      res.status(200).json(entity);
     } catch (error) {
       next(error);
     }
