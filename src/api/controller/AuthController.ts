@@ -8,7 +8,6 @@ import jwt from 'jsonwebtoken';
 import { Db } from 'mongodb';
 
 import { COLLECTIONS } from '../../config/collections';
-import { UserModel } from '../models/UserModel';
 import { AuthModel } from '../models/AuthModel';
 import { Repository } from '../repository/Repository';
 import { Controller } from './Controller';

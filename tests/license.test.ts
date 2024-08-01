@@ -13,7 +13,7 @@ import { setup } from '../src/app';
 import { seedUsers } from '../src/db/mongodb.seed';
 
 const {
-  MONGO_URL = 'mongodb://localhost:27018',
+  MONGO_URL = 'mongodb://localhost:27017',
   MONGO_DB = 'auth-test',
 } = process.env;
 

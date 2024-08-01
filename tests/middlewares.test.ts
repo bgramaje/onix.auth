@@ -12,7 +12,7 @@ import { ROUTES } from '../src/config/routes';
 import { setup } from '../src/app';
 
 const {
-  MONGO_URL = 'mongodb://localhost:27018',
+  MONGO_URL = 'mongodb://localhost:27017',
   MONGO_DB = 'auth-test',
 } = process.env;
 

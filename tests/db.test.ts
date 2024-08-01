@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import 'mocha';
 
 const {
-  MONGO_URL = 'mongodb://localhost:27018',
+  MONGO_URL = 'mongodb://localhost:27017',
   MONGO_DB = 'auth-test',
 } = process.env;
 
