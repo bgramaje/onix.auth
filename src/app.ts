@@ -10,15 +10,14 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import compression from 'compression';
 
-import { UserRouter } from './api/router/UserRouter.ts';
-import { TenantRouter } from './api/router/TenantRouter.ts';
-import { LicenseRouter } from './api/router/LicenseRouter.ts';
-
 import { ROUTES } from './config/routes.ts';
 
-import { notFoundMiddleware } from './api/middleware/notFoundMiddleware.ts';
-import { errorMiddleware } from './api/middleware/errorMiddleware.ts';
-import { AuthRouter } from './api/router/AuthRouter.ts';
+import { UserRouter } from './api/user/router/UserRouter.ts';
+import { TenantRouter } from './api/tenant/router/TenantRouter.ts';
+import { LicenseRouter } from './api/license/router/LicenseRouter.ts';
+import { AuthRouter } from './api/auth/router/AuthRouter.ts';
+import { notFoundMiddleware } from './api/common/middlewares/notFoundMiddleware.ts';
+import { errorMiddleware } from './api/common/middlewares/errorMiddleware.ts';
 
 export const setup = async (
   client : MongoClient,
@@ -28,6 +27,7 @@ export const setup = async (
   const app = express();
 
   if (debug) app.use(morgan(':remote-addr :method :url :status :res[content-length] - :response-time ms'));
+  
   app.use(helmet());
   app.use(cors());
   app.use(cookieParser());

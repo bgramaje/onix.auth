@@ -1,9 +1,10 @@
 import { Db, MongoClient } from 'mongodb';
 import { COLLECTIONS } from '../config/collections';
-import { UserRepository } from '../api/repository/UserRepository';
-import { UserModel } from '../api/models/UserModel';
-import { Role } from '../api/models/RoleModel';
+
 import { logger } from '../config/logger';
+import { UserRepository } from '../api/user/repository/UserRepository';
+import { UserModel } from '../api/user/models/UserModel';
+import { Role } from '../api/common/models/RoleModel';
 
 /**
  * @description seed user data inserting a test user for testing purposes
@@ -13,7 +14,7 @@ import { logger } from '../config/logger';
 export const seedUsers = async (client: MongoClient, mongoDb : string) => {
   try {
     const db: Db = client.db(mongoDb);
-    const repository = UserRepository.getInstance(COLLECTIONS.USERS, db) as UserRepository;
+    const repository = UserRepository.getInstance<UserRepository>(COLLECTIONS.USERS, db);
 
     const body: UserModel = {
       _id: 'test',
@@ -22,11 +23,12 @@ export const seedUsers = async (client: MongoClient, mongoDb : string) => {
       role: Role.Super,
       tenant: null,
     };
-
-    if (!(await repository.getByUsername(body.username))) {
-      const data = await repository.post(body);
-      logger.debug(data.msg);
-    }
+    
+    const userExists = await repository.getByUsername(body.username)
+    if (userExists) return;
+    
+    const data = await repository.post(body);
+    logger.debug(data.msg);
   } catch (err) {
     console.error('Error seeding data:', err);
   }
